@@ -11,9 +11,9 @@ import socket from './services/socket';
 import type { BrainMessage } from './services/socket';
 
 const STORAGE_KEY = 'bmo-face-bg-rgb';
-const DEFAULT_R = 211;
-const DEFAULT_G = 254;
-const DEFAULT_B = 220;
+const DEFAULT_R = 190;
+const DEFAULT_G = 243;
+const DEFAULT_B = 137;
 
 function loadRgb(): { r: number; g: number; b: number } {
   try {
