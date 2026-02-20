@@ -32,10 +32,8 @@ async def _handle_incoming(raw: str | bytes) -> None:
         msg_type = data.get("type", "?")
         logger.info("Face -> brain: type=%s payload=%s", msg_type, data)
         if msg_type == "input" and "text" in data:
-            from bmo_brain.face_adapter import send_message, send_speaking_end, send_state
-            await send_state("thinking")
-            await send_message(str(data["text"]))
-            await send_speaking_end()
+            from bmo_brain.runner import run_on_input
+            await run_on_input(str(data["text"]))
     except (json.JSONDecodeError, TypeError):
         preview = text[:200] + "..." if len(text) > 200 else text
         logger.info("Face -> brain: (raw) %s", preview)

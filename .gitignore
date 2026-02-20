@@ -28,3 +28,9 @@ face/.cursor
 brain/.agents
 brain/.cursor
 brain/.venv
+brain/.env
+# Python bytecode / cache (do not version)
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo

@@ -18,7 +18,24 @@ uv sync
 uv run python -m bmo_brain
 ```
 
-Listens on `0.0.0.0:8765` by default. To use another host/port, call from code:
+Listens on `0.0.0.0:8765` by default.
+
+### OpenAI (optional)
+
+To use a real LLM instead of echoing input, set:
+
+- **`OPENAI_API_KEY`** — Your OpenAI API key (required for LLM replies).
+- **`OPENAI_MODEL`** — Model name (default: `gpt-4o-mini`). Examples: `gpt-4o`, `gpt-4o-mini`, `gpt-4-turbo`.
+
+Example:
+
+```bash
+export OPENAI_API_KEY=sk-...
+export OPENAI_MODEL=gpt-4o-mini
+uv run python -m bmo_brain
+```
+
+You can put the variables in **`brain/.env`**; the app loads that file on startup (no need to `export`). `brain/.env` is in `.gitignore` so your key is not committed. To use another host/port, call from code:
 
 ```python
 from bmo_brain.server import run
