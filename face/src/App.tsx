@@ -19,6 +19,21 @@ function App(): React.ReactElement {
   const [mouthAnimating, setMouthAnimating] = useState(false);
 
   useEffect(() => {
+    const tryFullscreen = (): void => {
+      const doc = document.documentElement;
+      if (doc.requestFullscreen) doc.requestFullscreen().catch(() => {});
+    };
+    tryFullscreen();
+    const onFirstInteraction = (): void => {
+      tryFullscreen();
+      document.removeEventListener('click', onFirstInteraction);
+      document.removeEventListener('keydown', onFirstInteraction);
+    };
+    document.addEventListener('click', onFirstInteraction, { once: true });
+    document.addEventListener('keydown', onFirstInteraction, { once: true });
+  }, []);
+
+  useEffect(() => {
     socket.onConnect(() => {
       setConnectionStatus('connected');
       setEyeExpression('neutral');

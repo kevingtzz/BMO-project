@@ -29,6 +29,23 @@ Your app is ready to be deployed!
 
 See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
+### Pantalla completa / modo kiosk (Raspberry Pi)
+
+- **Desde la app:** Al cargar la página se intenta entrar en fullscreen. Si el navegador lo bloquea (pide gesto del usuario), el primer toque o tecla en la página activa fullscreen.
+- **Chromium en la Pi (modo kiosk):** Para que BMO arranque sin barra de direcciones ni bordes, lanza Chromium así (ajusta la URL si sirves el build por otro puerto o IP):
+
+  ```bash
+  chromium-browser --kiosk --noerrdialogs --disable-infobars --start-fullscreen http://localhost:3000
+  ```
+
+  Si sirves el build estático (p. ej. con `serve -s build` en el puerto 3000):
+
+  ```bash
+  chromium-browser --kiosk --noerrdialogs --disable-infobars --start-fullscreen http://localhost:3000
+  ```
+
+  Para que arranque al encender la Pi, añade esa línea a tu sesión de autostart (por ejemplo en `~/.config/autostart/bmo-face.desktop` o al inicio del script que levanta BMO).
+
 ### `npm run eject`
 
 **Note: this is a one-way operation. Once you `eject`, you can't go back!**
