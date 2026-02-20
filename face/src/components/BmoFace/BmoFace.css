@@ -1,0 +1,23 @@
+.bmo-face {
+  width: 100vw;
+  height: 100vh;
+  background: rgb(211, 254, 220);
+  border-radius: 0;
+  border: none;
+  box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  overflow: hidden;
+}
+
+.bmo-face-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8vh, 12vh, 18vh);
+  padding-top: clamp(18vh, 22vh, 26vh);
+}

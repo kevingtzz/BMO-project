@@ -1,0 +1,83 @@
+.bmo-mouth {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.bmo-mouth__shape {
+  width: clamp(6vw, 11vw, 18vw);
+  height: clamp(0.5vw, 1vw, 1.5vw);
+  min-width: 20px;
+  min-height: 2px;
+  background: transparent;
+  border-bottom: clamp(1px, 0.3vw, 3px) solid #1a1a1a;
+  border-radius: 0 0 50% 50%;
+  transition: transform 0.1s ease-out, height 0.1s ease-out, border-radius 0.1s ease-out;
+}
+
+/* Idle: neutral line */
+.bmo-mouth--idle .bmo-mouth__shape {
+  height: clamp(0.3vw, 0.5vw, 1px);
+  border-radius: 1px;
+  border-bottom-width: clamp(1px, 0.3vw, 2px);
+}
+
+/* Speaking: open/close loop - driven by .bmo-mouth--animating */
+.bmo-mouth--speaking .bmo-mouth__shape {
+  height: clamp(0.8vw, 1.5vw, 2vw);
+  border-radius: 0 0 45% 45%;
+}
+
+.bmo-mouth--speaking.bmo-mouth--animating .bmo-mouth__shape {
+  animation: bmo-mouth-speak 0.4s ease-in-out infinite;
+}
+
+@keyframes bmo-mouth-speak {
+  0%,
+  100% {
+    height: clamp(0.5vw, 1vw, 1.5vw);
+    border-radius: 0 0 50% 50%;
+  }
+  50% {
+    height: clamp(1vw, 2vw, 3vw);
+    border-radius: 0 0 40% 40%;
+  }
+}
+
+/* Smile */
+.bmo-mouth--smile .bmo-mouth__shape {
+  height: clamp(0.3vw, 0.5vw, 1px);
+  border-bottom-width: clamp(1px, 0.4vw, 3px);
+  border-radius: 0 0 50% 50%;
+  transform: scaleX(1.1);
+}
+
+/* Surprised: O shape */
+.bmo-mouth--surprised .bmo-mouth__shape {
+  width: clamp(4vw, 7vw, 10vw);
+  height: clamp(4vw, 7vw, 10vw);
+  min-width: 20px;
+  min-height: 20px;
+  border: clamp(1px, 0.4vw, 3px) solid #1a1a1a;
+  border-bottom-width: clamp(1px, 0.4vw, 3px);
+  border-radius: 50%;
+  background: transparent;
+}
+
+/* Thinking: flat line */
+.bmo-mouth--thinking .bmo-mouth__shape {
+  width: clamp(10vw, 16vw, 24vw);
+  height: clamp(0.3vw, 0.5vw, 1px);
+  border-radius: 0;
+  border-bottom-width: clamp(1px, 0.3vw, 2px);
+}
+
+/* Sleeping: short gentle smile */
+.bmo-mouth--sleeping .bmo-mouth__shape {
+  width: clamp(4vw, 7vw, 12vw);
+  min-width: 16px;
+  height: clamp(0.3vw, 0.5vw, 1px);
+  border-bottom-width: clamp(1px, 0.35vw, 2px);
+  border-radius: 0 0 50% 50%;
+  transform: scaleX(1);
+}

@@ -1,0 +1,41 @@
+.connection-status {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.65rem;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.connection-status__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9e9e9e;
+  transition: background 0.2s ease;
+}
+
+.connection-status[data-status='connected'] .connection-status__dot {
+  background: #2e7d32;
+}
+
+.connection-status[data-status='connecting'] .connection-status__dot {
+  background: #ed6c02;
+  animation: connection-pulse 1s ease-in-out infinite;
+}
+
+.connection-status[data-status='disconnected'] .connection-status__dot {
+  background: #c62828;
+}
+
+@keyframes connection-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}

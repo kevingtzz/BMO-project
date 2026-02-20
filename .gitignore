@@ -1,0 +1,30 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+face/node_modules
+face/.pnp
+face/.pnp.js
+
+# testing
+face/coverage
+
+# production
+face/build
+
+# misc
+.DS_Store
+face/.env.local
+face/.env.development.local
+face/.env.test.local
+face/.env.production.local
+
+face/npm-debug.log*
+face/yarn-debug.log*
+face/yarn-error.log*
+
+face/.agents
+face/.cursor
+
+brain/.agents
+brain/.cursor
+brain/.venv
