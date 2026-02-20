@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import BmoFace from './components/BmoFace';
 import ColorCalibration from './components/ColorCalibration';
+import BrainInput from './components/BrainInput';
 import type {
   ConnectionStatusType,
   EyeExpression,
@@ -48,6 +49,7 @@ function App(): React.ReactElement {
   const [mouthAnimating, setMouthAnimating] = useState(false);
   const [rgb, setRgb] = useState(loadRgb);
   const [calibrationOpen, setCalibrationOpen] = useState(false);
+  const [inputOpen, setInputOpen] = useState(false);
 
   const backgroundColor = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
 
@@ -74,14 +76,18 @@ function App(): React.ReactElement {
   }, []);
 
   useEffect(() => {
+    if (calibrationOpen || inputOpen) return;
     const onKeyDown = (e: KeyboardEvent): void => {
       if (e.key === 'c' || e.key === 'C') {
         setCalibrationOpen((open) => !open);
       }
+      if (e.key === 'i' || e.key === 'I') {
+        setInputOpen((open) => !open);
+      }
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, []);
+  }, [calibrationOpen, inputOpen]);
 
   useEffect(() => {
     const tryFullscreen = (): void => {
@@ -184,6 +190,9 @@ function App(): React.ReactElement {
           onB={setB}
           onClose={() => setCalibrationOpen(false)}
         />
+      )}
+      {inputOpen && (
+        <BrainInput onClose={() => setInputOpen(false)} />
       )}
     </div>
   );

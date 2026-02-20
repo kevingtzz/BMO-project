@@ -35,33 +35,51 @@ const listeners: {
   onDisconnect: null,
 };
 
+const LOG_PREFIX = '[BMO face]';
+
 function getUrl(): string {
   return DEFAULT_WS_URL;
 }
 
 function connect(): void {
-  if (ws?.readyState === WebSocket.OPEN) return;
+  if (ws?.readyState === WebSocket.OPEN) {
+    console.log(LOG_PREFIX, 'connect: already connected');
+    return;
+  }
   const url = getUrl();
+  console.log(LOG_PREFIX, 'connect: connecting to', url);
   try {
     ws = new WebSocket(url);
-    ws.onopen = () => listeners.onConnect?.();
-    ws.onclose = () => listeners.onDisconnect?.();
+    ws.onopen = () => {
+      console.log(LOG_PREFIX, 'connected to brain');
+      listeners.onConnect?.();
+    };
+    ws.onclose = (event) => {
+      console.log(LOG_PREFIX, 'disconnected from brain', { code: event.code, reason: event.reason || '—' });
+      listeners.onDisconnect?.();
+    };
     ws.onmessage = (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data as string) as BrainMessage;
+        console.log(LOG_PREFIX, 'message received:', data);
         listeners.onMessage?.(data);
       } catch {
+        console.log(LOG_PREFIX, 'message received (raw):', event.data);
         listeners.onMessage?.(event.data as string);
       }
     };
-    ws.onerror = () => {};
-  } catch {
+    ws.onerror = () => {
+      console.warn(LOG_PREFIX, 'WebSocket error');
+    };
+  } catch (err) {
+    console.error(LOG_PREFIX, 'connect failed:', err);
     listeners.onDisconnect?.();
   }
 }
 
 function disconnect(): void {
   if (ws) {
+    console.log(LOG_PREFIX, 'disconnect: closing connection');
     ws.close();
     ws = null;
   }
@@ -80,7 +98,11 @@ function onDisconnect(fn: Listener): void {
 
 function send(data: BrainMessage | string): void {
   if (ws?.readyState === WebSocket.OPEN) {
-    ws.send(typeof data === 'string' ? data : JSON.stringify(data));
+    const payload = typeof data === 'string' ? data : JSON.stringify(data);
+    console.log(LOG_PREFIX, 'message sent:', typeof data === 'string' ? data : (data as BrainMessage));
+    ws.send(payload);
+  } else {
+    console.warn(LOG_PREFIX, 'send: not connected, message dropped');
   }
 }
 
