@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import './App.css';
 import BmoFace from './components/BmoFace';
+import ColorCalibration from './components/ColorCalibration';
 import type {
   ConnectionStatusType,
   EyeExpression,
@@ -8,6 +9,34 @@ import type {
 } from './components/BmoFace/BmoFace';
 import socket from './services/socket';
 import type { BrainMessage } from './services/socket';
+
+const STORAGE_KEY = 'bmo-face-bg-rgb';
+const DEFAULT_R = 211;
+const DEFAULT_G = 254;
+const DEFAULT_B = 220;
+
+function loadRgb(): { r: number; g: number; b: number } {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw) as { r?: number; g?: number; b?: number };
+      if (
+        typeof parsed.r === 'number' &&
+        typeof parsed.g === 'number' &&
+        typeof parsed.b === 'number'
+      ) {
+        return {
+          r: Math.max(0, Math.min(255, parsed.r)),
+          g: Math.max(0, Math.min(255, parsed.g)),
+          b: Math.max(0, Math.min(255, parsed.b)),
+        };
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return { r: DEFAULT_R, g: DEFAULT_G, b: DEFAULT_B };
+}
 
 function App(): React.ReactElement {
   const [connectionStatus, setConnectionStatus] =
@@ -17,6 +46,31 @@ function App(): React.ReactElement {
     useState<EyeExpression>('sleeping');
   const [mouthMode, setMouthMode] = useState<MouthMode>('sleeping');
   const [mouthAnimating, setMouthAnimating] = useState(false);
+  const [rgb, setRgb] = useState(loadRgb);
+
+  const backgroundColor = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+
+  const setR = useCallback((v: number) => {
+    setRgb((prev) => {
+      const next = { ...prev, r: v };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+  const setG = useCallback((v: number) => {
+    setRgb((prev) => {
+      const next = { ...prev, g: v };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
+  const setB = useCallback((v: number) => {
+    setRgb((prev) => {
+      const next = { ...prev, b: v };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     const tryFullscreen = (): void => {
@@ -100,13 +154,22 @@ function App(): React.ReactElement {
   }, []);
 
   return (
-    <div className='App'>
+    <div className="App">
       <BmoFace
         connectionStatus={connectionStatus}
         speechText={speechText}
         eyeExpression={eyeExpression}
         mouthMode={mouthMode}
         mouthAnimating={mouthAnimating}
+        backgroundColor={backgroundColor}
+      />
+      <ColorCalibration
+        r={rgb.r}
+        g={rgb.g}
+        b={rgb.b}
+        onR={setR}
+        onG={setG}
+        onB={setB}
       />
     </div>
   );

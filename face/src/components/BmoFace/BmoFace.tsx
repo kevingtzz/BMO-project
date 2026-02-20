@@ -16,6 +16,7 @@ export interface BmoFaceProps {
   mouthAnimating?: boolean;
   speechText?: string;
   connectionStatus?: ConnectionStatusType;
+  backgroundColor?: string;
 }
 
 function BmoFace({
@@ -25,9 +26,13 @@ function BmoFace({
   mouthAnimating = false,
   speechText = '',
   connectionStatus = 'disconnected',
+  backgroundColor,
 }: BmoFaceProps): React.ReactElement {
   return (
-    <div className='bmo-face'>
+    <div
+      className="bmo-face"
+      style={backgroundColor != null ? { background: backgroundColor } : undefined}
+    >
       <ConnectionStatus status={connectionStatus} />
       <div className='bmo-face-content'>
         <BmoEyes expression={eyeExpression} />
