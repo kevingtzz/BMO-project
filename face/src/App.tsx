@@ -47,6 +47,7 @@ function App(): React.ReactElement {
   const [mouthMode, setMouthMode] = useState<MouthMode>('sleeping');
   const [mouthAnimating, setMouthAnimating] = useState(false);
   const [rgb, setRgb] = useState(loadRgb);
+  const [calibrationOpen, setCalibrationOpen] = useState(false);
 
   const backgroundColor = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
 
@@ -70,6 +71,16 @@ function App(): React.ReactElement {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       return next;
     });
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === 'c' || e.key === 'C') {
+        setCalibrationOpen((open) => !open);
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
   }, []);
 
   useEffect(() => {
@@ -163,14 +174,17 @@ function App(): React.ReactElement {
         mouthAnimating={mouthAnimating}
         backgroundColor={backgroundColor}
       />
-      <ColorCalibration
-        r={rgb.r}
-        g={rgb.g}
-        b={rgb.b}
-        onR={setR}
-        onG={setG}
-        onB={setB}
-      />
+      {calibrationOpen && (
+        <ColorCalibration
+          r={rgb.r}
+          g={rgb.g}
+          b={rgb.b}
+          onR={setR}
+          onG={setG}
+          onB={setB}
+          onClose={() => setCalibrationOpen(false)}
+        />
+      )}
     </div>
   );
 }

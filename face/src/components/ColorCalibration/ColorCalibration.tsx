@@ -7,6 +7,7 @@ export interface ColorCalibrationProps {
   onR: (v: number) => void;
   onG: (v: number) => void;
   onB: (v: number) => void;
+  onClose: () => void;
 }
 
 function ColorCalibration({
@@ -16,9 +17,18 @@ function ColorCalibration({
   onR,
   onG,
   onB,
+  onClose,
 }: ColorCalibrationProps): React.ReactElement {
   return (
     <div className="color-calibration" role="group" aria-label="Calibración de color RGB">
+      <button
+        type="button"
+        className="color-calibration__close"
+        onClick={onClose}
+        aria-label="Cerrar calibración"
+      >
+        ×
+      </button>
       <div className="color-calibration__title">Calibración pantalla</div>
       <div className="color-calibration__values">
         <span className="color-calibration__label">R</span>
