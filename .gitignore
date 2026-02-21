@@ -29,6 +29,7 @@ brain/.agents
 brain/.cursor
 brain/.venv
 brain/.env
+brain/.langgraph_api
 # Python bytecode / cache (do not version)
 __pycache__/
 *.py[cod]

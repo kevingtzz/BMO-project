@@ -1,0 +1,9 @@
+{
+  "dependencies": [
+    "."
+  ],
+  "graphs": {
+    "bmo-brain": "./src/bmo_brain/graph.py:graph"
+  },
+  "env": ".env"
+}

@@ -8,12 +8,17 @@ from langchain_openai import ChatOpenAI
 
 from bmo_brain.config import OPENAI_MODEL, use_openai
 from bmo_brain.protocol import (
+    EyeExpression,
+    emotion as build_emotion,
     message as build_message,
     speaking_end as build_speaking_end,
     state as build_state,
     to_json_dict,
 )
 from bmo_brain.state import State
+
+# Default duration (ms) for the chosen expression after the reply
+EMOTION_DURATION_MS = 2_000
 
 
 def _reply_text(user_text: str) -> str:
@@ -25,10 +30,41 @@ def _reply_text(user_text: str) -> str:
     return user_text
 
 
+def _infer_expression_from_input(user_text: str) -> EyeExpression:
+    """
+    Lightweight inference: pick BMO eye expression from user input only (no LLM).
+    Can be replaced later with gpt-4o-mini or similar for richer nuance.
+    """
+    lower = user_text.lower().strip()
+    if any(w in lower for w in ("chiste", "joke", "risa", "gracioso", "😂", "🤣")):
+        return "happy"
+    if any(w in lower for w in ("triste", "sad", "llorar", "mal")):
+        return "sad"
+    if any(w in lower for w in ("sorpresa", "surprise", "wow", "increíble")):
+        return "surprised"
+    if "?" in lower:
+        return "thinking"
+    return "neutral"
+
+
+def infer_expression(state: State) -> dict:
+    """
+    Light, fast node: infer eye expression from last_input only. Writes chosen_expression
+    and one emotion event so the runner can drain early (face reacts before LLM reply).
+    """
+    user_text = state.get("last_input") or ""
+    expression = _infer_expression_from_input(user_text)
+    event = to_json_dict(build_emotion(expression, duration_ms=EMOTION_DURATION_MS))
+    return {
+        "chosen_expression": expression,
+        "pending_face_events": [event],
+    }
+
+
 def process_input(state: State) -> dict:
     """
-    React to last user input: enqueue thinking, reply (LLM or echo), speaking_end for the face.
-    Reads state["last_input"]; returns partial state update with pending_face_events.
+    Heavy node: LLM (or echo), then enqueue thinking, message, speaking_end.
+    Uses chosen_expression from state (already sent by infer_expression); no duplicate emotion.
     """
     user_text = state.get("last_input") or ""
     reply = _reply_text(user_text)
@@ -39,5 +75,6 @@ def process_input(state: State) -> dict:
     ]
     return {
         "current_phase": "thinking",
+        "last_reply": reply,
         "pending_face_events": events,
     }

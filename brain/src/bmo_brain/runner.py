@@ -1,6 +1,7 @@
 """
 Runner: stream LLM reply to the face (or echo when no API key).
-Sends message_start, message_chunk (by phrase/sentence), message_end.
+Runs lightweight infer_expression first and drains its events (face reacts early),
+then sends thinking/speaking, message_start/chunk/end, speaking_end.
 """
 
 import uuid
@@ -15,6 +16,7 @@ from bmo_brain.face_adapter import (
     send_message_end,
     send_message_start,
 )
+from bmo_brain.nodes import infer_expression
 from bmo_brain.protocol import (
     message as build_message,
     speaking_end as build_speaking_end,
@@ -28,9 +30,13 @@ CHUNK_BOUNDARIES = frozenset(".,;:!?\n")
 
 async def run_on_input(user_text: str) -> None:
     """
-    Send thinking/speaking, then stream LLM reply (or echo) to the face, then speaking_end.
-    Streams message_start -> message_chunk (by phrase) -> message_end.
+    First run infer_expression and drain its events (emotion) so the face reacts immediately.
+    Then send thinking/speaking, stream LLM reply (or echo), speaking_end.
     """
+    step = infer_expression({"last_input": user_text})
+    for payload in step.get("pending_face_events") or []:
+        await broadcast(payload)
+
     await broadcast(to_json_dict(build_state("thinking")))
     await broadcast(to_json_dict(build_state("speaking")))
 
