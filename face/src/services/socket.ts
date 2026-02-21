@@ -2,15 +2,20 @@
  * Socket client for BMO face <-> brain communication.
  * Default brain URL: ws://localhost:8765 (override via env REACT_APP_BRAIN_WS_URL).
  *
- * Events from brain (expected later):
- * - state: "idle" | "listening" | "thinking" | "speaking"
- * - emotion: { value: "happy" | "sad" | "surprised", duration_ms?: number }
- * - speaking_start: { duration_ms?: number }
- * - speaking_end
- * - message: { text: string }
+ * Message contract (brain -> face):
+ * - message_start: { type: 'message_start', id: string }
+ * - message_chunk: { type: 'message_chunk', id: string, index: number, text: string }
+ * - message_end: { type: 'message_end', id: string }
+ * - message: { type: 'message', text: string } (legacy, full text)
+ * - state: { type: 'state', value: 'idle' | 'listening' | 'thinking' | 'speaking' }
+ * - speaking_end: { type: 'speaking_end' }
+ * - emotion: { type: 'emotion', value: string, duration_ms?: number }
  */
 
 export type BrainMessage =
+  | { type: 'message_start'; id: string }
+  | { type: 'message_chunk'; id: string; index: number; text: string }
+  | { type: 'message_end'; id: string }
   | { type: 'message'; text: string }
   | { type: 'state'; value: 'idle' | 'listening' | 'thinking' | 'speaking' }
   | { type: 'speaking_end' }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import './App.css';
 import BmoFace from './components/BmoFace';
 import ColorCalibration from './components/ColorCalibration';
@@ -50,6 +50,7 @@ function App(): React.ReactElement {
   const [rgb, setRgb] = useState(loadRgb);
   const [calibrationOpen, setCalibrationOpen] = useState(false);
   const [inputOpen, setInputOpen] = useState(false);
+  const currentMessageIdRef = useRef<string | null>(null);
 
   const backgroundColor = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
 
@@ -106,11 +107,43 @@ function App(): React.ReactElement {
       const msg = data as BrainMessage;
       if (
         'type' in msg &&
+        msg.type === 'message_start' &&
+        'id' in msg &&
+        typeof msg.id === 'string'
+      ) {
+        currentMessageIdRef.current = msg.id;
+        setSpeechText('');
+      }
+      if (
+        'type' in msg &&
+        msg.type === 'message_chunk' &&
+        'id' in msg &&
+        'text' in msg &&
+        typeof msg.text === 'string'
+      ) {
+        if (currentMessageIdRef.current === (msg as { id: string }).id) {
+          setSpeechText((prev) => prev + msg.text);
+        }
+      }
+      if (
+        'type' in msg &&
+        msg.type === 'message_end' &&
+        'id' in msg &&
+        typeof (msg as { id: string }).id === 'string'
+      ) {
+        if (currentMessageIdRef.current === (msg as { id: string }).id) {
+          currentMessageIdRef.current = null;
+        }
+      }
+      if (
+        'type' in msg &&
         msg.type === 'message' &&
         'text' in msg &&
         msg.text != null
-      )
+      ) {
+        currentMessageIdRef.current = null;
         setSpeechText(String(msg.text));
+      }
       if ('type' in msg && msg.type === 'state' && 'value' in msg) {
         const v = msg.value;
         if (v === 'speaking') {
