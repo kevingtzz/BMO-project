@@ -3,6 +3,7 @@ import './App.css';
 import BmoFace from './components/BmoFace';
 import ColorCalibration from './components/ColorCalibration';
 import BrainInput from './components/BrainInput';
+import ExpressionTester from './components/ExpressionTester/ExpressionTester';
 import type {
   ConnectionStatusType,
   EyeExpression,
@@ -56,6 +57,8 @@ function App(): React.ReactElement {
   const [rgb, setRgb] = useState(loadRgb);
   const [calibrationOpen, setCalibrationOpen] = useState(false);
   const [inputOpen, setInputOpen] = useState(false);
+  const [expressionTesterOpen, setExpressionTesterOpen] = useState(false);
+  const [expressionIndex, setExpressionIndex] = useState(0);
   const currentMessageIdRef = useRef<string | null>(null);
   const lastStableFaceRef = useRef<{ eyes: EyeExpression; mouth: MouthMode }>({
     eyes: 'neutral',
@@ -114,8 +117,33 @@ function App(): React.ReactElement {
     [applyFace]
   );
 
+  const expressionKeys = Object.keys(FACE_PRESETS);
+  const activeExpressionKey = expressionKeys[expressionIndex] ?? 'neutral_idle';
+
+  const formatExpressionName = useCallback((value: string): string => {
+    return value
+      .split('_')
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  }, []);
+
+  const applyExpressionByIndex = useCallback(
+    (nextIndex: number): void => {
+      if (expressionKeys.length === 0) return;
+      const wrapped = (nextIndex + expressionKeys.length) % expressionKeys.length;
+      setExpressionIndex(wrapped);
+      applyPreset(expressionKeys[wrapped]);
+    },
+    [applyPreset, expressionKeys]
+  );
+
   useEffect(() => {
-    if (calibrationOpen || inputOpen) return;
+    if (!expressionTesterOpen) return;
+    applyPreset(activeExpressionKey);
+  }, [activeExpressionKey, applyPreset, expressionTesterOpen]);
+
+  useEffect(() => {
+    if (calibrationOpen || inputOpen || expressionTesterOpen) return;
     const onKeyDown = (e: KeyboardEvent): void => {
       if (e.key === 'c' || e.key === 'C') {
         setCalibrationOpen((open) => !open);
@@ -123,10 +151,13 @@ function App(): React.ReactElement {
       if (e.key === 'i' || e.key === 'I') {
         setInputOpen((open) => !open);
       }
+      if (e.key === 'e' || e.key === 'E') {
+        setExpressionTesterOpen((open) => !open);
+      }
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [calibrationOpen, inputOpen]);
+  }, [calibrationOpen, expressionTesterOpen, inputOpen]);
 
   useEffect(() => {
     socket.onConnect(() => {
@@ -269,6 +300,14 @@ function App(): React.ReactElement {
       )}
       {inputOpen && (
         <BrainInput onClose={() => setInputOpen(false)} />
+      )}
+      {expressionTesterOpen && (
+        <ExpressionTester
+          expressionName={formatExpressionName(activeExpressionKey)}
+          onPrev={() => applyExpressionByIndex(expressionIndex - 1)}
+          onNext={() => applyExpressionByIndex(expressionIndex + 1)}
+          onClose={() => setExpressionTesterOpen(false)}
+        />
       )}
     </div>
   );

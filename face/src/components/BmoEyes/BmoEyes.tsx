@@ -56,11 +56,42 @@ export interface BmoEyesProps {
   expression?: EyeExpression;
 }
 
+interface VisualTune {
+  scale: number;
+  x: number;
+  y: number;
+}
+
+const DEFAULT_TUNE: VisualTune = { scale: 1, x: 0, y: 0 };
+
+// Per-expression visual calibration (size + position).
+const EYE_TUNE: Partial<Record<EyeExpression, VisualTune>> = {
+  neutral: { scale: 1, x: 0, y: 50 },
+  happy: { scale: 1, x: 0, y: 40 },
+  sad: { scale: 1, x: 0, y: 50 },
+  surprised: { scale: 1.5, x: 0, y: 0 },
+  thinking: { scale: 1, x: 0, y: 0 },
+  angry: { scale: 1, x: 0, y: 0 },
+  closed: { scale: 1, x: 0, y: 0 },
+  sleeping: { scale: 1, x: 0, y: 40 },
+  concerned: { scale: 1, x: 0, y: 0 },
+  affection: { scale: 1, x: 0, y: 40 },
+  alert: { scale: 1, x: 0, y: 0 },
+  error: { scale: 1, x: 0, y: 0 },
+  confused: { scale: 1, x: 0, y: 0 },
+  playful: { scale: 1, x: 0, y: 30 },
+  excited: { scale: 1, x: 0, y: 0 },
+  love: { scale: 1.5, x: 0, y: 20 },
+  system_mode: { scale: 1, x: 0, y: 30 },
+};
+
 function BmoEyes({ expression = 'neutral' }: BmoEyesProps): React.ReactElement {
   const svg = EYE_SVGS[expression] ?? EYE_SVGS.neutral;
+  const tune = EYE_TUNE[expression] ?? DEFAULT_TUNE;
+  const transform = `translate(${tune.x}px, ${tune.y}px) scale(${tune.scale})`;
   return (
     <div className='bmo-eyes' aria-hidden>
-      <img className='bmo-eyes__svg' src={svg} alt='' />
+      <img className='bmo-eyes__svg' src={svg} alt='' style={{ transform }} />
     </div>
   );
 }
