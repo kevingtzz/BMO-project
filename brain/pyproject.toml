@@ -11,9 +11,13 @@ dependencies = [
     "langchain-core",
     "langchain-openai>=1.1.10",
     "langgraph",
-    "langgraph-cli[inmem]>=0.4.12",
     "python-dotenv>=1.2.1",
     "websockets",
+]
+
+[project.optional-dependencies]
+dev = [
+    "langgraph-cli[inmem]>=0.4.12",
 ]
 
 [project.scripts]
