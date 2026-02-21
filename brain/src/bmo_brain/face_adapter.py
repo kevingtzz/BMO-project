@@ -8,6 +8,9 @@ import logging
 from bmo_brain.protocol import (
     emotion as build_emotion,
     message as build_message,
+    message_chunk as build_message_chunk,
+    message_end as build_message_end,
+    message_start as build_message_start,
     speaking_end as build_speaking_end,
     state as build_state,
     to_json_dict,
@@ -40,8 +43,23 @@ async def send_state(value: StateValue) -> None:
 
 
 async def send_message(text: str) -> None:
-    """Send speech text to the face."""
+    """Send speech text to the face (legacy: single full text)."""
     await broadcast(to_json_dict(build_message(text)))
+
+
+async def send_message_start(id: str) -> None:
+    """Start a new response stream; face clears and tracks by id."""
+    await broadcast(to_json_dict(build_message_start(id)))
+
+
+async def send_message_chunk(id: str, index: int, text: str) -> None:
+    """Send one chunk of the response (e.g. phrase/sentence)."""
+    await broadcast(to_json_dict(build_message_chunk(id, index, text)))
+
+
+async def send_message_end(id: str) -> None:
+    """Signal end of response stream."""
+    await broadcast(to_json_dict(build_message_end(id)))
 
 
 async def send_emotion(value: str, duration_ms: int | None = None) -> None:

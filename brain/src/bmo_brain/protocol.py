@@ -27,6 +27,23 @@ class MessagePayload(TypedDict):
     text: str
 
 
+class MessageStartPayload(TypedDict):
+    type: Literal["message_start"]
+    id: str
+
+
+class MessageChunkPayload(TypedDict):
+    type: Literal["message_chunk"]
+    id: str
+    index: int
+    text: str
+
+
+class MessageEndPayload(TypedDict):
+    type: Literal["message_end"]
+    id: str
+
+
 class StatePayload(TypedDict):
     type: Literal["state"]
     value: StateValue
@@ -43,8 +60,23 @@ class EmotionPayload(TypedDict, total=False):
 
 
 def message(text: str) -> MessagePayload:
-    """Build a message payload (speech text shown on face)."""
+    """Build a message payload (speech text shown on face). Legacy: full text."""
     return {"type": "message", "text": text}
+
+
+def message_start(id: str) -> MessageStartPayload:
+    """Start a new response; face clears and uses this id for following chunks."""
+    return {"type": "message_start", "id": id}
+
+
+def message_chunk(id: str, index: int, text: str) -> MessageChunkPayload:
+    """Stream chunk (e.g. phrase/sentence). End of response is signaled with message_end."""
+    return {"type": "message_chunk", "id": id, "index": index, "text": text}
+
+
+def message_end(id: str) -> MessageEndPayload:
+    """End of response."""
+    return {"type": "message_end", "id": id}
 
 
 def state(value: StateValue) -> StatePayload:
@@ -66,7 +98,13 @@ def emotion(value: str, duration_ms: int | None = None) -> EmotionPayload:
 
 
 def to_json_dict(
-    payload: MessagePayload | StatePayload | SpeakingEndPayload | EmotionPayload,
+    payload: MessagePayload
+    | MessageStartPayload
+    | MessageChunkPayload
+    | MessageEndPayload
+    | StatePayload
+    | SpeakingEndPayload
+    | EmotionPayload,
 ) -> dict:
     """Return the payload as a dict ready for json.dumps (same shape the face expects)."""
     return dict(payload)
