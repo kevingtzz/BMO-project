@@ -4,7 +4,15 @@ Protocol types and serialization for BMO face <-> brain communication.
 Messages match the contract in face/src/services/socket.ts (BrainMessage).
 """
 
+import logging
 from typing import Literal, TypedDict
+
+from bmo_brain.face_contract import (
+    FACE_CONTRACT_VERSION,
+    normalize_face_preset,
+)
+
+logger = logging.getLogger(__name__)
 
 # State values drive mouth mode and animation (face App.tsx)
 StateValue = Literal["idle", "listening", "thinking", "speaking"]
@@ -53,6 +61,11 @@ class SpeakingEndPayload(TypedDict):
     type: Literal["speaking_end"]
 
 
+class ContractInfoPayload(TypedDict):
+    type: Literal["contract_info"]
+    version: str
+
+
 class EmotionPayload(TypedDict, total=False):
     type: Literal["emotion"]
     value: str  # EyeExpression
@@ -89,9 +102,25 @@ def speaking_end() -> SpeakingEndPayload:
     return {"type": "speaking_end"}
 
 
+def contract_info(version: str) -> ContractInfoPayload:
+    """Build contract_info payload (shared contract version)."""
+    return {"type": "contract_info", "version": version}
+
+
 def emotion(value: str, duration_ms: int | None = None) -> EmotionPayload:
-    """Build an emotion payload (eye expression, optional duration in ms)."""
-    payload: EmotionPayload = {"type": "emotion", "value": value}
+    """
+    Build an emotion payload.
+
+    If value matches shared face contract aliases, emit canonical preset key.
+    """
+    canonical = normalize_face_preset(value)
+    if canonical is None:
+        logger.warning(
+            "Emotion value '%s' not present in face contract v%s; sending raw value",
+            value,
+            FACE_CONTRACT_VERSION,
+        )
+    payload: EmotionPayload = {"type": "emotion", "value": canonical or value}
     if duration_ms is not None:
         payload["duration_ms"] = duration_ms
     return payload
@@ -104,6 +133,7 @@ def to_json_dict(
     | MessageEndPayload
     | StatePayload
     | SpeakingEndPayload
+    | ContractInfoPayload
     | EmotionPayload,
 ) -> dict:
     """Return the payload as a dict ready for json.dumps (same shape the face expects)."""

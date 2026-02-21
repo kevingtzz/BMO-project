@@ -1,0 +1,66 @@
+{
+  "version": "2026-02-20",
+  "aliases": {
+    "neutral": "neutral_idle",
+    "neutral_idle": "neutral_idle",
+    "happy": "happy_success",
+    "happy_success": "happy_success",
+    "sad": "sad_empathy",
+    "sad_empathy": "sad_empathy",
+    "thinking": "thinking_processing",
+    "thinking_processing": "thinking_processing",
+    "concerned": "concerned_clarification_needed",
+    "concerned_clarification_needed": "concerned_clarification_needed",
+    "surprised": "surprised_important_event",
+    "surprised_important_event": "surprised_important_event",
+    "affection": "affection_friendly_bond",
+    "affection_friendly_bond": "affection_friendly_bond",
+    "alert": "alert_warning",
+    "alert_warning": "alert_warning",
+    "error": "error_system_error",
+    "error_system_error": "error_system_error",
+    "confused": "confused",
+    "playful": "playful",
+    "excited": "excited",
+    "sleep": "sleep_low_power",
+    "sleep_low_power": "sleep_low_power",
+    "love": "love",
+    "system_mode": "system_mode"
+  },
+  "presets": {
+    "neutral_idle": { "kind": "fixed", "eyes": "neutral", "mouth": "idle" },
+    "happy_success": { "kind": "fixed", "eyes": "happy", "mouth": "happy" },
+    "sad_empathy": { "kind": "fixed", "eyes": "sad", "mouth": "sad" },
+    "thinking_processing": {
+      "kind": "keep_previous",
+      "fallback": { "eyes": "neutral", "mouth": "idle" }
+    },
+    "concerned_clarification_needed": {
+      "kind": "fixed",
+      "eyes": "concerned",
+      "mouth": "concerned"
+    },
+    "surprised_important_event": {
+      "kind": "fixed",
+      "eyes": "surprised",
+      "mouth": "surprised"
+    },
+    "affection_friendly_bond": {
+      "kind": "fixed",
+      "eyes": "affection",
+      "mouth": "affection"
+    },
+    "alert_warning": { "kind": "fixed", "eyes": "alert", "mouth": "alert" },
+    "error_system_error": { "kind": "fixed", "eyes": "error", "mouth": "error" },
+    "confused": { "kind": "fixed", "eyes": "confused", "mouth": "confused" },
+    "playful": { "kind": "fixed", "eyes": "playful", "mouth": "playful" },
+    "excited": { "kind": "fixed", "eyes": "excited", "mouth": "excited" },
+    "sleep_low_power": { "kind": "fixed", "eyes": "sleeping", "mouth": "sleeping" },
+    "love": { "kind": "fixed", "eyes": "love", "mouth": "love" },
+    "system_mode": {
+      "kind": "fixed",
+      "eyes": "system_mode",
+      "mouth": "system_mode"
+    }
+  }
+}

@@ -4,6 +4,13 @@
   align-items: center;
 }
 
+.bmo-mouth__svg {
+  width: clamp(18vw, 22vw, 28vw);
+  height: auto;
+  max-width: 100%;
+  display: block;
+}
+
 .bmo-mouth__shape {
   width: clamp(18vw, 28vw, 42vw);
   height: clamp(1.4vw, 2.4vw, 3.5vw);

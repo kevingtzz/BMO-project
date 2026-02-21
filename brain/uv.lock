@@ -44,9 +44,13 @@ dependencies = [
     { name = "langchain-core" },
     { name = "langchain-openai" },
     { name = "langgraph" },
-    { name = "langgraph-cli", extra = ["inmem"] },
     { name = "python-dotenv" },
     { name = "websockets" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "langgraph-cli", extra = ["inmem"] },
 ]
 
 [package.metadata]
@@ -54,10 +58,11 @@ requires-dist = [
     { name = "langchain-core" },
     { name = "langchain-openai", specifier = ">=1.1.10" },
     { name = "langgraph" },
-    { name = "langgraph-cli", extras = ["inmem"], specifier = ">=0.4.12" },
+    { name = "langgraph-cli", extras = ["inmem"], marker = "extra == 'dev'", specifier = ">=0.4.12" },
     { name = "python-dotenv", specifier = ">=1.2.1" },
     { name = "websockets" },
 ]
+provides-extras = ["dev"]
 
 [[package]]
 name = "certifi"

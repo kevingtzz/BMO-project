@@ -2,78 +2,11 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: clamp(18vw, 26vw, 36vw);
+  width: clamp(40vw, 54vw, 66vw);
 }
 
-.bmo-eyes__left,
-.bmo-eyes__right {
-  width: clamp(4vw, 7vw, 11vw);
-  height: clamp(4vw, 7vw, 11vw);
-  min-width: 20px;
-  min-height: 20px;
-  background: #1a1a1a;
-  border-radius: 50%;
-  transition: transform 0.15s ease-out;
-}
-
-/* Neutral: default dots */
-.bmo-eyes--neutral .bmo-eyes__left,
-.bmo-eyes--neutral .bmo-eyes__right {
-  transform: scale(1);
-}
-
-/* Happy: slight curve effect (optional: use SVG later) */
-.bmo-eyes--happy .bmo-eyes__left,
-.bmo-eyes--happy .bmo-eyes__right {
-  transform: scale(1.05);
-}
-
-/* Sad: droopy - move down slightly */
-.bmo-eyes--sad .bmo-eyes__left,
-.bmo-eyes--sad .bmo-eyes__right {
-  transform: translateY(20%) scale(0.95);
-}
-
-/* Surprised: bigger */
-.bmo-eyes--surprised .bmo-eyes__left,
-.bmo-eyes--surprised .bmo-eyes__right {
-  transform: scale(1.4);
-}
-
-/* Thinking: shift to one side */
-.bmo-eyes--thinking .bmo-eyes__left {
-  transform: translateX(-15%);
-}
-.bmo-eyes--thinking .bmo-eyes__right {
-  transform: translateX(-15%);
-}
-
-/* Angry: angled */
-.bmo-eyes--angry .bmo-eyes__left {
-  transform: rotate(-8deg) translateY(-5%);
-}
-.bmo-eyes--angry .bmo-eyes__right {
-  transform: rotate(8deg) translateY(-5%);
-}
-
-/* Closed: squished */
-.bmo-eyes--closed .bmo-eyes__left,
-.bmo-eyes--closed .bmo-eyes__right {
-  height: clamp(0.3vw, 0.5vw, 2px);
-  border-radius: 1px;
-  transform: scaleX(1.2);
-}
-
-/* Sleeping: U-shaped closed eyes (curve opening downward like "u") */
-.bmo-eyes--sleeping .bmo-eyes__left,
-.bmo-eyes--sleeping .bmo-eyes__right {
-  width: clamp(6vw, 9vw, 14vw);
-  height: clamp(1.2vw, 2vw, 3vw);
-  min-width: 28px;
-  min-height: 8px;
-  background: transparent;
-  border: none;
-  border-bottom: clamp(2px, 0.6vw, 4px) solid #1a1a1a;
-  border-radius: 0 0 50% 50%;
-  transform: none;
+.bmo-eyes__svg {
+  width: 100%;
+  height: auto;
+  display: block;
 }

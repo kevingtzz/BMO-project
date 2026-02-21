@@ -9,6 +9,7 @@
  * - message: { type: 'message', text: string } (legacy, full text)
  * - state: { type: 'state', value: 'idle' | 'listening' | 'thinking' | 'speaking' }
  * - speaking_end: { type: 'speaking_end' }
+ * - contract_info: { type: 'contract_info', version: string }
  * - emotion: { type: 'emotion', value: string, duration_ms?: number }
  */
 
@@ -19,6 +20,7 @@ export type BrainMessage =
   | { type: 'message'; text: string }
   | { type: 'state'; value: 'idle' | 'listening' | 'thinking' | 'speaking' }
   | { type: 'speaking_end' }
+  | { type: 'contract_info'; version: string }
   | { type: 'emotion'; value: string; duration_ms?: number }
   | Record<string, unknown>;
 

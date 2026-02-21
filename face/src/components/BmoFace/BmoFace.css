@@ -18,6 +18,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(10vh, 14vh, 20vh);
-  padding-top: clamp(24vh, 28vh, 34vh);
+  gap: clamp(6vh, 8vh, 12vh);
+  padding-top: clamp(16vh, 20vh, 24vh);
 }

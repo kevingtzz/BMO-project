@@ -9,7 +9,6 @@ from langchain_openai import ChatOpenAI
 from bmo_brain.config import OPENAI_MODEL, use_openai
 from bmo_brain.protocol import (
     EyeExpression,
-    emotion as build_emotion,
     message as build_message,
     speaking_end as build_speaking_end,
     state as build_state,
@@ -17,8 +16,8 @@ from bmo_brain.protocol import (
 )
 from bmo_brain.state import State
 
-# Default duration (ms) for the chosen expression after the reply
-EMOTION_DURATION_MS = 2_000
+# Primary expression while BMO answers.
+RESPONSE_TONE_DURATION_MS = 2_000
 
 
 def _reply_text(user_text: str) -> str:
@@ -30,44 +29,45 @@ def _reply_text(user_text: str) -> str:
     return user_text
 
 
-def _infer_expression_from_input(user_text: str) -> EyeExpression:
+def infer_response_tone_expression(reply_text: str) -> EyeExpression:
     """
-    Lightweight inference: pick BMO eye expression from user input only (no LLM).
-    Can be replaced later with gpt-4o-mini or similar for richer nuance.
+    Infer the main emotion from the assistant reply tone (phase 2).
     """
-    lower = user_text.lower().strip()
-    if any(w in lower for w in ("chiste", "joke", "risa", "gracioso", "😂", "🤣")):
+    lower = reply_text.lower().strip()
+    if not lower:
+        return "neutral"
+    if any(w in lower for w in ("jaja", "jajaja", "😂", "🤣", "genial", "me encanta", "feliz")):
         return "happy"
-    if any(w in lower for w in ("triste", "sad", "llorar", "mal")):
+    if any(w in lower for w in ("lo siento", "perdón", "lament", "triste")):
         return "sad"
-    if any(w in lower for w in ("sorpresa", "surprise", "wow", "increíble")):
+    if any(w in lower for w in ("ojo", "cuidado", "error", "no deberías", "no deberia")):
+        return "angry"
+    if any(
+        w in lower
+        for w in (
+            "wow",
+            "sorprendente",
+            "increíble",
+            "increible",
+            "no puede ser",
+            "qué loco",
+            "que loco",
+        )
+    ):
         return "surprised"
     if "?" in lower:
         return "thinking"
     return "neutral"
 
 
-def infer_expression(state: State) -> dict:
-    """
-    Light, fast node: infer eye expression from last_input only. Writes chosen_expression
-    and one emotion event so the runner can drain early (face reacts before LLM reply).
-    """
-    user_text = state.get("last_input") or ""
-    expression = _infer_expression_from_input(user_text)
-    event = to_json_dict(build_emotion(expression, duration_ms=EMOTION_DURATION_MS))
-    return {
-        "chosen_expression": expression,
-        "pending_face_events": [event],
-    }
-
-
 def process_input(state: State) -> dict:
     """
     Heavy node: LLM (or echo), then enqueue thinking, message, speaking_end.
-    Uses chosen_expression from state (already sent by infer_expression); no duplicate emotion.
+    Response tone is inferred from reply text only.
     """
     user_text = state.get("last_input") or ""
     reply = _reply_text(user_text)
+    response_tone = infer_response_tone_expression(reply)
     events = [
         to_json_dict(build_state("thinking")),
         to_json_dict(build_message(reply)),
@@ -76,5 +76,6 @@ def process_input(state: State) -> dict:
     return {
         "current_phase": "thinking",
         "last_reply": reply,
+        "response_tone_expression": response_tone,
         "pending_face_events": events,
     }

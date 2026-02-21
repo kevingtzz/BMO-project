@@ -10,6 +10,12 @@ import type {
 } from './components/BmoFace/BmoFace';
 import socket from './services/socket';
 import type { BrainMessage } from './services/socket';
+import {
+  FACE_PRESET_ALIASES,
+  FACE_CONTRACT_VERSION,
+  FACE_PRESETS,
+  type FacePresetDefinition,
+} from './contracts/faceContract';
 
 const STORAGE_KEY = 'bmo-face-bg-rgb';
 const DEFAULT_R = 190;
@@ -51,6 +57,10 @@ function App(): React.ReactElement {
   const [calibrationOpen, setCalibrationOpen] = useState(false);
   const [inputOpen, setInputOpen] = useState(false);
   const currentMessageIdRef = useRef<string | null>(null);
+  const lastStableFaceRef = useRef<{ eyes: EyeExpression; mouth: MouthMode }>({
+    eyes: 'neutral',
+    mouth: 'idle',
+  });
 
   const backgroundColor = `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
 
@@ -76,6 +86,34 @@ function App(): React.ReactElement {
     });
   }, []);
 
+  const applyFace = useCallback(
+    (eyes: EyeExpression, mouth: MouthMode, remember = true): void => {
+      setEyeExpression(eyes);
+      setMouthMode(mouth);
+      setMouthAnimating(false);
+      if (remember) lastStableFaceRef.current = { eyes, mouth };
+    },
+    []
+  );
+
+  const applyPreset = useCallback(
+    (raw: string): boolean => {
+      const key = raw.trim().toLowerCase().replace(/[\s/]+/g, '_');
+      const preset = FACE_PRESET_ALIASES[key];
+      if (!preset) return false;
+      const presetDef = FACE_PRESETS[preset] as FacePresetDefinition | undefined;
+      if (!presetDef) return false;
+      if (presetDef.kind === 'keep_previous') {
+        const prev = lastStableFaceRef.current ?? presetDef.fallback;
+        applyFace(prev.eyes, prev.mouth, false);
+        return true;
+      }
+      applyFace(presetDef.eyes, presetDef.mouth, true);
+      return true;
+    },
+    [applyFace]
+  );
+
   useEffect(() => {
     if (calibrationOpen || inputOpen) return;
     const onKeyDown = (e: KeyboardEvent): void => {
@@ -93,8 +131,7 @@ function App(): React.ReactElement {
   useEffect(() => {
     socket.onConnect(() => {
       setConnectionStatus('connected');
-      setEyeExpression('neutral');
-      setMouthMode('idle');
+      applyFace('neutral', 'idle', true);
     });
     socket.onDisconnect(() => {
       setConnectionStatus('disconnected');
@@ -150,13 +187,31 @@ function App(): React.ReactElement {
           setMouthMode('speaking');
           setMouthAnimating(true);
         } else {
-          setMouthMode(v === 'thinking' ? 'thinking' : 'idle');
+          setMouthMode(v === 'thinking' ? 'thinking' : lastStableFaceRef.current.mouth);
           setMouthAnimating(false);
         }
       }
       if ('type' in msg && msg.type === 'speaking_end') {
         setMouthAnimating(false);
-        setMouthMode('idle');
+        setMouthMode(lastStableFaceRef.current.mouth);
+      }
+      if (
+        'type' in msg &&
+        msg.type === 'contract_info' &&
+        'version' in msg &&
+        typeof msg.version === 'string'
+      ) {
+        if (msg.version !== FACE_CONTRACT_VERSION) {
+          console.warn(
+            '[BMO face] contract version mismatch:',
+            'brain=',
+            msg.version,
+            'face=',
+            FACE_CONTRACT_VERSION
+          );
+        } else {
+          console.log('[BMO face] contract version ok:', msg.version);
+        }
       }
       if (
         'type' in msg &&
@@ -164,16 +219,19 @@ function App(): React.ReactElement {
         'value' in msg &&
         msg.value
       ) {
-        const emotion = msg.value as EyeExpression;
-        setEyeExpression(emotion);
-        if (emotion === 'sleeping') {
-          setMouthMode('sleeping');
+        const emotion = String(msg.value);
+        const applied = applyPreset(emotion);
+        if (!applied) {
+          const legacy = emotion as EyeExpression;
+          setEyeExpression(legacy);
+          if (legacy === 'sleeping') {
+            setMouthMode('sleeping');
+          }
         }
         if ('duration_ms' in msg && typeof msg.duration_ms === 'number') {
           const ms = msg.duration_ms;
           setTimeout(() => {
-            setEyeExpression('neutral');
-            if (emotion === 'sleeping') setMouthMode('idle');
+            applyFace('neutral', 'idle', true);
           }, ms);
         }
       }
@@ -181,7 +239,7 @@ function App(): React.ReactElement {
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [applyFace, applyPreset]);
 
   useEffect(() => {
     setConnectionStatus('connecting');

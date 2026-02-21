@@ -23,8 +23,8 @@ class State(TypedDict, total=False):
     last_input: str
     # Last reply text (set by process_input)
     last_reply: str
-    # Expression chosen for the face (set by infer_expression; read by process_input)
-    chosen_expression: EyeExpression
+    # Main tone inferred from reply text (phase 2)
+    response_tone_expression: EyeExpression
     # Pending payloads to send to the face (dicts matching protocol)
     # Reducer: nodes return new list; lists are concatenated (append semantics)
     pending_face_events: Annotated[list[dict], operator.add]

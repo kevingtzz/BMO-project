@@ -8,6 +8,8 @@ import asyncio
 import json
 import logging
 
+from bmo_brain.face_contract import FACE_CONTRACT_VERSION
+from bmo_brain.protocol import contract_info as build_contract_info, to_json_dict
 from websockets.asyncio.server import serve
 
 logger = logging.getLogger(__name__)
@@ -43,6 +45,7 @@ async def _handler(websocket) -> None:
     """Register client on connect, unregister on disconnect."""
     _connected.add(websocket)
     logger.info("Face connected (total: %d)", len(_connected))
+    await websocket.send(json.dumps(to_json_dict(build_contract_info(FACE_CONTRACT_VERSION))))
     try:
         async for raw in websocket:
             await _handle_incoming(raw)
